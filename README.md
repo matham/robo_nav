@@ -1,3 +1,45 @@
+Robo Nav project MEA something
+===================================
+
+Tested on kinetic
+
+To Install
+-----------
+```sh
+cd ~
+mkdir -p catkin_ws_robo/src
+cd catkin_ws_robo/src
+git clone https://github.com/matham/robo_nav.git
+cd ..
+rosdep update
+rosdep install --from-paths src -i
+catkin_make
+```
+
+To run
+------------
+In one terminal start ros with
+```sh
+source devel/setup.bash
+roslaunch ca_gazebo create_2.launch
+```
+Once started, to make the robot move in another terminal run
+```sh
+source devel/setup.bash
+rostopic pub -r 10 /cmd_vel geometry_msgs/Twist '{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0,y: 0.0,z: 0.0}}'
+```
+
+or to run the project code run in a second terminal to see the robot move
+```sh
+source devel/setup.bash
+rosrun ca_robo_nav main.py
+```
+
+The main project code is in `catkin_ws_robo/src/robo_nav/ca_robo_nav/src/`.
+
+
+
+
 # create_autonomy
 
 [ROS](http://ros.org) driver for iRobot [Create 1 and 2](http://www.irobot.com/About-iRobot/STEM/Create-2.aspx).
