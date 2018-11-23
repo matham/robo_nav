@@ -9,21 +9,45 @@ To Install
 cd ~
 mkdir -p catkin_ws_robo/src
 cd catkin_ws_robo/src
+
 git clone https://github.com/matham/robo_nav.git
+git clone https://github.com/wg-perception/people.git
+git clone https://github.com/marinaKollmitz/lattice_planner.git
+git clone https://github.com/marinaKollmitz/human_aware_navigation.git
+git clone https://github.com/marinaKollmitz/timed_path_follower.git
+git clone https://github.com/DLu/wu_ros_tools.git
+
 cd ..
 rosdep update
 rosdep install --from-paths src -i
 catkin_make
 ```
 
+For kinetic, fix navigation.launch by changing 
+https://github.com/marinaKollmitz/human_aware_navigation/blob/indigo-devel/human_aware_nav_launch/launch/navigation.launch#L14
+to `includes/amcl/amcl.launch.xml`
+
 To run
 ------------
-In one terminal start ros with
+To start gazebo with a world, in one terminal start ros with
 ```sh
 source devel/setup.bash
 roslaunch ca_gazebo create_2.launch
 ```
-Once started, to make the robot move in another terminal run
+
+Or if you'll be using the turtle world run
+```sh
+export TURTLEBOT_GAZEBO_WORLD_FILE=/opt/ros/kinetic/share/turtlebot_gazebo/worlds/playground.world
+roslaunch turtlebot_gazebo turtlebot_world.launch
+```
+
+To start the navigation system, in another terminal do
+```sh
+source devel/setup.bash
+roslaunch human_aware_nav_launch navigation.launch
+```
+
+To make the robot move manually, in another terminal run
 ```sh
 source devel/setup.bash
 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist '{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0,y: 0.0,z: 0.0}}'
