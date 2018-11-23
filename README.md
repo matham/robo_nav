@@ -11,7 +11,7 @@ mkdir -p catkin_ws_robo/src
 cd catkin_ws_robo/src
 
 git clone https://github.com/matham/robo_nav.git
-git clone https://github.com/wg-perception/people.git
+git clone https://github.com/matham/people.git
 git clone https://github.com/marinaKollmitz/lattice_planner.git
 git clone https://github.com/marinaKollmitz/human_aware_navigation.git
 git clone https://github.com/marinaKollmitz/timed_path_follower.git
