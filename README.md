@@ -23,6 +23,18 @@ rosdep install --from-paths src -i
 catkin_make
 ```
 
+Update Gazebo
+--------------
+Follow the instructions here to install the latest version Gazebo 7:
+http://gazebosim.org/tutorials?cat=install&tut=install_ubuntu&ver=7.0#Alternativeinstallation:step-by-step
+
+To enable the VM to use the graphics card:
+```sh
+echo "export SVGA_VGPU10=0" >> ~/.bashrc
+source ~/.bashrc
+```
+
+
 To run
 ------------
 To start gazebo with a world, in one terminal start ros with
