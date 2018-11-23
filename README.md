@@ -23,10 +23,6 @@ rosdep install --from-paths src -i
 catkin_make
 ```
 
-For kinetic, fix navigation.launch by changing 
-https://github.com/marinaKollmitz/human_aware_navigation/blob/indigo-devel/human_aware_nav_launch/launch/navigation.launch#L14
-to `includes/amcl/amcl.launch.xml`
-
 To run
 ------------
 To start gazebo with a world, in one terminal start ros with
