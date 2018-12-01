@@ -41,6 +41,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <people_msgs/PeoplePrediction.h>
 #include <tf/transform_listener.h>
+#include <std_msgs/Float64.h>
 
 namespace human_aware_navigation
 {

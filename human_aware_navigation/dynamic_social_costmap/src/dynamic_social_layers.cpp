@@ -99,6 +99,7 @@ void SocialLayers::update()
   double angle_k; //angle in one timestep
   double angle_kplus1; //angle in the next timestep
   double person_angle; //angle of the person
+  double probability;
 
   lattice_planner::TimedCostmap* timed_map; //one layer
   ros::Duration t_inkr; //time inkrement for the interpolation between two time steps
@@ -125,6 +126,10 @@ void SocialLayers::update()
       people_k = predicted_people_.predicted_people.at(i);
       people_kplus1 = predicted_people_.predicted_people.at(i+1);
       ros::Duration delta_t_steps = people_kplus1.header.stamp - people_k.header.stamp;
+      
+
+      // ~~~ get the probability that the person walks in this path
+      probability = predicted_people_.path_probabilities[i].data;
 
       /**
        * @todo enforce the specified time for the dynamic cost map layers. Right
@@ -153,6 +158,7 @@ void SocialLayers::update()
         //calculate the angle for a person by assuming that they walk forward
         angle_k = atan2(person_k.velocity.y, person_k.velocity.x);
         angle_kplus1 = atan2(person_kplus1.velocity.y, person_kplus1.velocity.x);
+
 
         //mark the human in the cost map layer. To capture the predicted trajectory,
         //we interpolate between the pose at time step k and the pose at step (k+1)
@@ -189,7 +195,7 @@ void SocialLayers::update()
               //if position is in the map, mark it in the map (put Gaussian cost
               //values around position
               markHumanInCostmap(person_in_map_x, person_in_map_y,
-                                 person_in_map_angle, timed_map);
+                                 person_in_map_angle, probability, timed_map);
             }
 
             //enlarge time inkrement for next interpolation step
@@ -333,8 +339,9 @@ void SocialLayers::reconfigureCB(dynamic_social_costmap::SocialCostmapConfig &co
     for(int i=0; i<max_layers_; i++)
     {
       //mark the resulting cost function at different positions inside the cost map
+      // ~~~ CHECK THE PROBABILITY VALUE SENT HERE
       markHumanInCostmap(timed_costmap->size_x / 8 + (i * 1.0 / timed_costmap->resolution),
-                         timed_costmap->size_y / 2, M_PI_4, timed_costmap);
+                         timed_costmap->size_y / 2, 0.0, M_PI_4, timed_costmap);
     }
 
     //publish the marked costmap for visualization
@@ -413,20 +420,17 @@ bool SocialLayers::getCostmapCoordinates(geometry_msgs::PoseStamped* pose,
   return true;
 }
 
-void SocialLayers::markHumanInCostmap(int human_in_costmap_x, int human_in_costmap_y,
-                                      double angle, lattice_planner::TimedCostmap *costmap)
+void SocialLayers::markHumanInCostmap(int human_in_costmap_x, int human_in_costmap_y, double angle, 
+					double probability, lattice_planner::TimedCostmap *costmap)
 {
   //calculate the Gaussian params for the time index of the cost map layer
-  double amplitude =
-      (1 + costmap->time_index * amplitude_time_factor_) * amplitude_;
-  double cutoff_amplitude =
-      (1 - costmap->time_index * variance_time_factor_) * cutoff_amplitude_;
-  double variance_x =
-      (1 + costmap->time_index * variance_time_factor_) * variance_x_;
-  double variance_y =
-      (1 + costmap->time_index * variance_time_factor_) * variance_y_;
-  double lethal_radius =
-      (1 + costmap->time_index * forbidden_radius_time_factor_) * forbidden_radius_;
+
+  // ~~~ the amplitude is multiplied by the probability that the human takes this path
+  double amplitude = probability * (1 + costmap->time_index * amplitude_time_factor_) * amplitude_;
+  double cutoff_amplitude = (1 - costmap->time_index * variance_time_factor_) * cutoff_amplitude_;
+  double variance_x = (1 + costmap->time_index * variance_time_factor_) * variance_x_;
+  double variance_y = (1 + costmap->time_index * variance_time_factor_) * variance_y_;
+  double lethal_radius = (1 + costmap->time_index * forbidden_radius_time_factor_) * forbidden_radius_;
 
   //clamp the values
   amplitude = amplitude > 0.0 ? amplitude : 0.0;
@@ -438,7 +442,7 @@ void SocialLayers::markHumanInCostmap(int human_in_costmap_x, int human_in_costm
 
   //calculate gaussian around human
   if(amplitude > 0)
-  {
+ {
     double resolution = static_map_->getCostmap()->getResolution();
 
     //calculate radius around human for cutoff amplitude

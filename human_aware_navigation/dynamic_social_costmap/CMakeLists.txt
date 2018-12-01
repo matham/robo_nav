@@ -7,6 +7,7 @@ find_package(catkin REQUIRED
     dynamic_reconfigure
     lattice_planner
     message_generation
+    std_msgs
     people_msgs
     roscpp
     rospy

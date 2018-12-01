@@ -123,6 +123,11 @@ void ConstantVelocityPrediction::peopleCallback(people_msgs::People msg)
     }
     //push back the predictions for this time step to the prediction container
     predictions.predicted_people.push_back(people_one_timestep);
+
+    // ~~~ push back the probability of this prediction 
+    std_msgs::Float64 probability;
+    probability.data = 1.0; // ~~~ do calculation here 
+    predictions.path_probabilities.push_back(probability);
   }
 
   //publish predictions and prediction markers

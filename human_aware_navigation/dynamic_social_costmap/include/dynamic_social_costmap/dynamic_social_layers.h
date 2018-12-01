@@ -48,6 +48,7 @@
 #include <people_msgs/People.h>
 #include <people_msgs/PersonStamped.h>
 #include <people_msgs/PeoplePrediction.h>
+#include <std_msgs/Float64.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <dynamic_social_costmap/SocialCostmapConfig.h>
@@ -199,11 +200,12 @@ protected:
    * @param angle angle of human in map
    * @param costmap costmap to update
    */
-  void markHumanInCostmap(int human_in_costmap_x, int human_in_costmap_y, double angle,
+  void markHumanInCostmap(int human_in_costmap_x, int human_in_costmap_y, double angle, double probability, 
                           lattice_planner::TimedCostmap *costmap);
 
   std::vector<lattice_planner::TimedCostmap*> timed_costmap_; ///< the actual costmap layers
   people_msgs::PeoplePrediction predicted_people_; ///< container for predicted human trajectories
+  //std_msgs::Float64MultiArray predicted_probability_;  /// < for storing the probabilities of each path
   costmap_2d::Costmap2DROS* static_map_; ///< the underlying static map
 
   //gaussian parameters

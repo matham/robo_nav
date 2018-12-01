@@ -31,6 +31,7 @@
   <run_depend>people_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
 
   <export>
     <lattice_planner plugin="${prefix}/social_layer_plugin.xml" />
