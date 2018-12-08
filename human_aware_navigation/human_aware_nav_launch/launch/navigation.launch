@@ -2,7 +2,7 @@
 
   <!--<arg name="map_file" default="$(find human_aware_nav_launch)/maps/turtlebot_at_home_map.yaml"/> -->
   <!--<arg name="map_file" default="$(find human_aware_nav_launch)/maps/social_sim_env.yaml"/> -->
-  <arg name="map_file" default="$(find human_aware_nav_launch)/maps/playground_new.yaml"/>
+  <arg name="map_file" default="$(find human_aware_nav_launch)/maps/testingground.yaml"/>
 
   <arg name="initial_pose_x" default="0" />
   <arg name="initial_pose_y" default="0" />
