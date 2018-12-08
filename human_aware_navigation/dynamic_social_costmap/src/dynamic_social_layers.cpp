@@ -126,10 +126,6 @@ void SocialLayers::update()
       people_k = predicted_people_.predicted_people.at(i);
       people_kplus1 = predicted_people_.predicted_people.at(i+1);
       ros::Duration delta_t_steps = people_kplus1.header.stamp - people_k.header.stamp;
-      
-
-      // ~~~ get the probability that the person walks in this path
-      probability = predicted_people_.path_probabilities[i].data;
 
       /**
        * @todo enforce the specified time for the dynamic cost map layers. Right
@@ -153,6 +149,9 @@ void SocialLayers::update()
       //in the cost map layer
       for(int j=0; j<people_k.people.size(); j++)
       {
+
+		// ~~~ get the probability that the person walks in this path
+		probability = predicted_people_.path_probabilities[j].data;
         person_k = people_k.people.at(j);
         person_kplus1 = people_kplus1.people.at(j);
         //calculate the angle for a person by assuming that they walk forward

@@ -21,7 +21,7 @@
   <include file="$(find human_aware_nav_launch)/launch/move_base.launch" />
 
   <!--- Run constant velocity prediction node -->
-  <node name="constant_velocity_prediction" pkg="people_prediction" type="constant_velocity_prediction" />
+  <!-- <node name="constant_velocity_prediction" pkg="people_prediction" type="constant_velocity_prediction" />-->
 
   <!--- Run rviz --> 
   <include file="$(find human_aware_nav_launch)/launch/rviz.launch" />
