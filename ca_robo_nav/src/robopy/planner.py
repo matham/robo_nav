@@ -124,17 +124,19 @@ class PersonPath(object):
         if people.header.stamp == rospy.Time():
             people.header.stamp = rospy.get_rostime()
 
-        delta_t = []
+        #delta_t = []
         tdist = 0.0
         for goal in self.goals:
             goal.update_distance(person)
             dist = (goal.heuristic_distance[-1] - goal.heuristic_distance[0])
             dist = max(dist, 0.0)
             tdist +=  dist**2.0
-            delta_t.append(dist)         
+            #delta_t.append(dist)         
 
         if tdist > 0.0: # to avoid singularities
             for goal in self.goals:
+	        dist = (goal.heuristic_distance[-1] - goal.heuristic_distance[0])
+                dist = max(dist, 0.0)
                 goal.probability = ((goal.heuristic_distance[-1] - goal.heuristic_distance[0])**2.0)/tdist
 
         #print(tdist, [goal.probability for goal in self.goals], sum([goal.probability for goal in self.goals])) 
