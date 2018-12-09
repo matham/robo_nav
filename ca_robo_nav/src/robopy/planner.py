@@ -9,6 +9,7 @@ from tf.transformations import quaternion_from_euler
 
 import roslib
 import rospy
+import math
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64
@@ -26,27 +27,39 @@ class GoalPath(object):
 
     time_resolution = .5
 
-    offset = 0
-
-    def __init__(self, offset=0, **kwargs):
+    def __init__(self, goal_pos=(0, 0), **kwargs):
         super(GoalPath, self).__init__(**kwargs)
-        self.offset = offset
+        self.goal_pos = goal_pos
 
     def predict_path(self, person):
         path_prediction = self.path_prediction = []
-        for i in range(self.num_predictions):
+        goal_x, goal_y = self.goal_pos
+        vx, vy = person.velocity.x, person.velocity.y
+        px, py = person.position.x, person.position.y
+        goal_dist = ((goal_x - px) ** 2 + (goal_y - py) ** 2) ** 0.5
+
+        speed = (vx **2 + vy ** 2) ** 0.5
+        theta = math.atan2(goal_y - py, goal_x - px)
+        step_dist = speed * self.time_resolution
+        if not speed:
+            max_prediction = 0
+        else:
+            max_prediction = min(self.num_predictions, math.ceil(goal_dist / step_dist))
+
+        step_x, step_y = step_dist * math.cos(theta), step_dist * math.sin(theta)
+        last_x, last_y = px, py
+        for i in range(1, self.num_predictions + 1):
             person_prediction = Person()
+            person_prediction.position.z = 0
+            person_prediction.velocity = person.velocity
             path_prediction.append(person_prediction)
 
-            person_prediction.position.x = person.position.x + \
-                (i * self.time_resolution * person.velocity.x) + self.offset
-            person_prediction.position.y = person.position.y + \
-                (i * self.time_resolution * person.velocity.y)
-            person_prediction.position.z = person.position.z + \
-                (i * self.time_resolution * person.velocity.z)
-
-            # the velocity stays the same
-            person_prediction.velocity = person.velocity
+            if i >= max_prediction:
+                person_prediction.position.x = last_x
+                person_prediction.position.y = last_y
+            else:
+                last_x = person_prediction.position.x = px +  i * step_x
+                last_y = person_prediction.position.y = py +  i * step_y
 
 
 class PersonPath(object):
@@ -67,7 +80,7 @@ class PersonPath(object):
         rospy.init_node('person_path_prediction', anonymous=True)
         self.people_sub = rospy.Subscriber("people", People, self.people_callback)
 
-        self.goals = [GoalPath(offset=0), GoalPath(offset=5), GoalPath(offset=10)]
+        self.goals = [GoalPath(goal_pos=(1.23, 1.46)), GoalPath(goal_pos=(-6.36, 0.29)), GoalPath(goal_pos=(6.57, 1.25))]
 
         self.prediction_pub = rospy.Publisher("people_prediction", PeoplePrediction, queue_size=10)
         self.marker_pub = rospy.Publisher("prediction_viz", MarkerArray, queue_size=10)
@@ -108,7 +121,7 @@ class PersonPath(object):
         for i in range(self.num_predictions):
             people_one_timestep = People()
             people_one_timestep.people = []
-            for goal in self.goals:
+            for goal in self.goals[::-1]:
                 person_prediction = goal.path_prediction[i]
 
                 people_one_timestep.people.append(person_prediction)
@@ -131,6 +144,7 @@ class PersonPath(object):
             # push back the predictions for this time step to the prediction container
             predictions.predicted_people.append(people_one_timestep)
 
+        # print([marker.pose.position.x for marker in markers.markers])
         self.prediction_pub.publish(predictions)
         self.marker_pub.publish(markers)
 

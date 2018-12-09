@@ -88,12 +88,9 @@ class PersonControl(object):
     def run(self):
         settings = termios.tcgetattr(sys.stdin)
         x = y = z = th = 0
-        speed = 0.1
+        speed = 0.25
         status = 0
         turn = 1.
-
-        px = -5.74
-        py = -1.1
 
         people_marker = Marker()
         people_marker.header.frame_id = "map"
@@ -112,8 +109,8 @@ class PersonControl(object):
         people = People()
         person = Person()
 
-        person.position.x = px
-        person.position.y = py
+        person.position.x = 0
+        person.position.y = -5.
 
         s = rospy.get_time()
         while True:
