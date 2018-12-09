@@ -45,6 +45,7 @@ roslaunch ca_gazebo create_2.launch
 
 Or if you'll be using the turtle world run
 ```sh
+export ROBOT_INITIAL_POSE="-x 6.0 -y -5.0 -z 0.0"
 export TURTLEBOT_GAZEBO_WORLD_FILE=/opt/ros/kinetic/share/turtlebot_gazebo/worlds/playground.world
 roslaunch turtlebot_gazebo turtlebot_world.launch
 ```

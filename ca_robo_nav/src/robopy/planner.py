@@ -159,6 +159,7 @@ class PersonPath(object):
             probabilities.append(Float64())
             probabilities[-1].data = goal.probability
 
+        k = 0
         for i in range(self.num_predictions):
             people_one_timestep = People()
             people_one_timestep.people = []
@@ -170,7 +171,8 @@ class PersonPath(object):
                 prediction_marker = self.get_marker()
                 prediction_marker.header.frame_id = people.header.frame_id
                 prediction_marker.header.stamp = people.header.stamp
-                prediction_marker.id = i
+                prediction_marker.id = k
+                k += 1
 
                 prediction_marker.pose.position = person_prediction.position
                 # the opacity of the marker is adjusted according to the prediction step
@@ -185,7 +187,6 @@ class PersonPath(object):
             # push back the predictions for this time step to the prediction container
             predictions.predicted_people.append(people_one_timestep)
 
-        # print([marker.pose.position.x for marker in markers.markers])
         self.prediction_pub.publish(predictions)
         self.marker_pub.publish(markers)
 
