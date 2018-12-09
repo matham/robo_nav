@@ -32,10 +32,7 @@ class GoalPath(object):
 
     def __init__(self, goal_pos=(0, 0), **kwargs):
         super(GoalPath, self).__init__(**kwargs)
-
-        self.offset = offset
         self.heuristic_distance = deque([])
-
         self.goal_pos = goal_pos
 
     def predict_path(self, person):
@@ -61,27 +58,19 @@ class GoalPath(object):
             person_prediction.velocity = person.velocity
             path_prediction.append(person_prediction)
 
-            person_prediction.position.x = person.position.x + \
-                (i * self.time_resolution * person.velocity.x) + self.offset
-            person_prediction.position.y = person.position.y + \
-                (i * self.time_resolution * person.velocity.y)
-            person_prediction.position.z = person.position.z + \
-                (i * self.time_resolution * person.velocity.z)
-
-            # the velocity stays the same
-            person_prediction.velocity = person.velocity
-    
-    def update_distance(self, person):
-        dist = ((person.position.x - self.goal_pos[0])**2.0 + (person.position.y - self.goal_pos[1])**2.0)**0.5
-        self.heuristic_distance.append(dist)
-        if (len(self.heuristic_distance) > self.num_predictions):
-            self.heuristic_distance.popleft()
             if i >= max_prediction:
                 person_prediction.position.x = last_x
                 person_prediction.position.y = last_y
             else:
                 last_x = person_prediction.position.x = px +  i * step_x
                 last_y = person_prediction.position.y = py +  i * step_y
+
+    def update_distance(self, person):
+        dist = ((person.position.x - self.goal_pos[0])**2.0 + (person.position.y - self.goal_pos[1])**2.0)**0.5
+        self.heuristic_distance.append(dist)
+        if (len(self.heuristic_distance) > self.num_predictions):
+            self.heuristic_distance.popleft()
+
 
 class PersonPath(object):
 
@@ -159,6 +148,7 @@ class PersonPath(object):
             probabilities.append(Float64())
             probabilities[-1].data = goal.probability
 
+        k = 0
         for i in range(self.num_predictions):
             people_one_timestep = People()
             people_one_timestep.people = []
@@ -170,11 +160,12 @@ class PersonPath(object):
                 prediction_marker = self.get_marker()
                 prediction_marker.header.frame_id = people.header.frame_id
                 prediction_marker.header.stamp = people.header.stamp
-                prediction_marker.id = i
+                prediction_marker.id = k
+                k += 1
 
                 prediction_marker.pose.position = person_prediction.position
                 # the opacity of the marker is adjusted according to the prediction step
-                prediction_marker.color.a = 1 - i / float(self.num_predictions)
+                prediction_marker.color.a = 1 - i / float(self.num_predictions) * goal.probability
 
                 markers.markers.append(prediction_marker)
 
@@ -185,7 +176,6 @@ class PersonPath(object):
             # push back the predictions for this time step to the prediction container
             predictions.predicted_people.append(people_one_timestep)
 
-        # print([marker.pose.position.x for marker in markers.markers])
         self.prediction_pub.publish(predictions)
         self.marker_pub.publish(markers)
 
