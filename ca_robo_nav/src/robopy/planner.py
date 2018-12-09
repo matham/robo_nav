@@ -13,6 +13,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64
 
+from collections import deque
 
 class GoalPath(object):
 
@@ -20,7 +21,9 @@ class GoalPath(object):
 
     num_predictions = 20
 
-    probability = .33333
+    heuristic_distance = []
+
+    probability = 0.33333
 
     path_prediction = []
 
@@ -31,6 +34,8 @@ class GoalPath(object):
     def __init__(self, offset=0, **kwargs):
         super(GoalPath, self).__init__(**kwargs)
         self.offset = offset
+        self.heuristic_distance = deque([])
+        #self.update_distance()
 
     def predict_path(self, person):
         path_prediction = self.path_prediction = []
@@ -47,7 +52,13 @@ class GoalPath(object):
 
             # the velocity stays the same
             person_prediction.velocity = person.velocity
-
+    
+    def update_distance(self, person):
+        dist = ((person.position.x - self.goal_pos[0])**2.0 + (person.position.y - self.goal_pos[1])**2.0)**0.5
+        self.heuristic_distance.append(dist)
+        if (len(self.heuristic_distance) > self.num_predictions):
+            self.heuristic_distance.popleft()
+	
 
 class PersonPath(object):
 
@@ -62,6 +73,8 @@ class PersonPath(object):
     time_resolution = .5
 
     num_predictions = 20
+
+    probabilities = []
 
     def start_node(self):
         rospy.init_node('person_path_prediction', anonymous=True)
@@ -98,6 +111,24 @@ class PersonPath(object):
         # if the message stamp is empty, we assign the current time
         if people.header.stamp == rospy.Time():
             people.header.stamp = rospy.get_rostime()
+
+        delta_t = []
+        tdist = 0.0
+        for goal in self.goals:
+            goal.update_distance(person)
+            dist = (goal.heuristic_distance[-1] - goal.heuristic_distance[0])**2.0
+            tdist +=  dist
+            delta_t.append(dist)         
+
+        if tdist > 0.0: # to avoid singularities
+            for goal in self.goals:
+                goal.probability = ((goal.heuristic_distance[-1] - goal.heuristic_distance[0])**2.0)/tdist
+
+        #print(tdist, [goal.probability for goal in self.goals], sum([goal.probability for goal in self.goals])) 
+        #if sum(delta_t) > 0.0:
+        #    print(tdist, delta_t, sum(delta_t), delta_t[0]/sum(delta_t)) 
+        #else:
+        #    print(tdist, delta_t, sum(delta_t))              
 
         predictions.path_probabilities = probabilities = []
         for goal in self.goals:
