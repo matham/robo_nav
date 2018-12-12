@@ -67,6 +67,8 @@ class GoalPath(object):
 
     def update_distance(self, person):
         dist = ((person.position.x - self.goal_pos[0])**2.0 + (person.position.y - self.goal_pos[1])**2.0)**0.5
+        if dist < 0.0001:
+            return
         self.heuristic_distance.append(dist)
         if (len(self.heuristic_distance) > self.num_predictions):
             self.heuristic_distance.popleft()
@@ -128,16 +130,16 @@ class PersonPath(object):
         tdist = 0.0
         for goal in self.goals:
             goal.update_distance(person)
-            dist = (goal.heuristic_distance[-1] - goal.heuristic_distance[0])
+            dist = -(goal.heuristic_distance[-1] - goal.heuristic_distance[0])
             dist = max(dist, 0.0)
             tdist +=  dist**2.0
             #delta_t.append(dist)         
 
         if tdist > 0.0: # to avoid singularities
             for goal in self.goals:
-	        dist = (goal.heuristic_distance[-1] - goal.heuristic_distance[0])
+                dist = -(goal.heuristic_distance[-1] - goal.heuristic_distance[0])
                 dist = max(dist, 0.0)
-                goal.probability = ((goal.heuristic_distance[-1] - goal.heuristic_distance[0])**2.0)/tdist
+                goal.probability = dist**2.0 / tdist
 
         #print(tdist, [goal.probability for goal in self.goals], sum([goal.probability for goal in self.goals])) 
         #if sum(delta_t) > 0.0:
@@ -168,7 +170,7 @@ class PersonPath(object):
 
                 prediction_marker.pose.position = person_prediction.position
                 # the opacity of the marker is adjusted according to the prediction step
-                prediction_marker.color.a = 1 - i / float(self.num_predictions) * goal.probability
+                prediction_marker.color.a = (1 - i / float(self.num_predictions)) * goal.probability
 
                 markers.markers.append(prediction_marker)
 

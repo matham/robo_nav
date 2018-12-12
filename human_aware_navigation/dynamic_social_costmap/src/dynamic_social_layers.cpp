@@ -150,8 +150,8 @@ void SocialLayers::update()
       for(int j=0; j<people_k.people.size(); j++)
       {
 
-		// ~~~ get the probability that the person walks in this path
-		probability = predicted_people_.path_probabilities[j].data;
+        // ~~~ get the probability that the person walks in this path
+        probability = 1; //predicted_people_.path_probabilities[j].data;
         person_k = people_k.people.at(j);
         person_kplus1 = people_kplus1.people.at(j);
         //calculate the angle for a person by assuming that they walk forward

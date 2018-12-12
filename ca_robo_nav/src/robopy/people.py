@@ -71,9 +71,11 @@ speedBindings={
         'c':(1,.9),
     }
 
-def getKey(settings):
+def getKey(settings, timeout):
     tty.setraw(sys.stdin.fileno())
-    select.select([sys.stdin], [], [], 0)
+    res, _, _ = select.select([sys.stdin], [], [], timeout)
+    if not res:
+        return None
     key = sys.stdin.read(1)
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
     return key
@@ -114,8 +116,9 @@ class PersonControl(object):
 
         s = rospy.get_time()
         while True:
-            key = getKey(settings)
-            x = y = z = th = 0
+            key = getKey(settings, .05)
+            z = th = 0
+            x = y = 0
             if key == 'i':
                 y = 1
             elif key == 'k':
@@ -125,7 +128,7 @@ class PersonControl(object):
             elif key == 'l':
                 x = 1
             elif (key == '\x03'):
-				break
+                break
 
             delta_t = .05
             people.header.stamp = rospy.get_rostime()
@@ -145,4 +148,4 @@ class PersonControl(object):
 
 
 if __name__ == '__main__':
-	PersonControl().run()
+    PersonControl().run()
