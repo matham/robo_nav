@@ -151,7 +151,7 @@ void SocialLayers::update()
       {
 
         // ~~~ get the probability that the person walks in this path
-        probability = 1; //predicted_people_.path_probabilities[j].data;
+        probability = predicted_people_.path_probabilities[j].data;
         person_k = people_k.people.at(j);
         person_kplus1 = people_kplus1.people.at(j);
         //calculate the angle for a person by assuming that they walk forward
@@ -440,7 +440,7 @@ void SocialLayers::markHumanInCostmap(int human_in_costmap_x, int human_in_costm
   lethal_radius = lethal_radius > 0.0 ? lethal_radius : 0.0;
 
   //calculate gaussian around human
-  if(amplitude > 0)
+  if(amplitude > cutoff_amplitude)
  {
     double resolution = static_map_->getCostmap()->getResolution();
 
