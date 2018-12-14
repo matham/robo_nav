@@ -20,7 +20,7 @@ class GoalPath(object):
 
     goal_pos = (0, 0)
 
-    num_predictions = 20
+    num_predictions = 40
 
     heuristic_distance = []
 
@@ -86,7 +86,7 @@ class PersonPath(object):
 
     time_resolution = .5
 
-    num_predictions = 20
+    num_predictions = 40
 
     probabilities = []
 
@@ -94,7 +94,7 @@ class PersonPath(object):
         rospy.init_node('person_path_prediction', anonymous=True)
         self.people_sub = rospy.Subscriber("people", People, self.people_callback)
 
-        self.goals = [GoalPath(goal_pos=(1.23, 1.46)), GoalPath(goal_pos=(-6.36, 0.29)), GoalPath(goal_pos=(6.57, 1.25))]
+        self.goals = [GoalPath(goal_pos=(-1.37, 1.54)), GoalPath(goal_pos=(.23, 1.44)), GoalPath(goal_pos=(1.45, 1.45))]
 
         self.prediction_pub = rospy.Publisher("people_prediction", PeoplePrediction, queue_size=10)
         self.marker_pub = rospy.Publisher("prediction_viz", MarkerArray, queue_size=10)

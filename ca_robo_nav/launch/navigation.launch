@@ -4,18 +4,10 @@
   <!--<arg name="map_file" default="$(find human_aware_nav_launch)/maps/social_sim_env.yaml"/> -->
   <arg name="map_file" default="$(find human_aware_nav_launch)/maps/testingground.yaml"/>
 
-  <arg name="initial_pose_x" default="6" />
-  <arg name="initial_pose_y" default="-5" />
-  <arg name="initial_pose_a" default="0" />
-
   <!-- Run the map server -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
-
-  <include file="$(find turtlebot_navigation)/launch/includes/amcl/amcl.launch.xml" >
-  <arg name="initial_pose_x" value="$(arg initial_pose_x)" />
-  <arg name="initial_pose_y" value="$(arg initial_pose_y)" />
-  <arg name="initial_pose_a" value="$(arg initial_pose_a)" />
-  </include>
+	
+  <include file="$(find jackal_description)/launch/description.launch" />
 
   <!--- Run Move Base -->
   <include file="$(find human_aware_nav_launch)/launch/move_base.launch" />
